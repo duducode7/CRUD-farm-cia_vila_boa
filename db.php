@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "root";
-$db   = "biblioteca_db";
+$db   = "vila_boa_farm";
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {

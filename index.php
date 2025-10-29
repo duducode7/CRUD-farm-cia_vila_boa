@@ -1,72 +1,20 @@
-<?php
-// login.php
-
-// 1) Conexão
-$mysqli = new mysqli("localhost", "root", "root", "login_db");
-if ($mysqli->connect_errno) {
-    die("Erro de conexão: " . $mysqli->connect_error);
-}
-
-session_start();
-
-// 2) Logout
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header("Location: index.php");
-    exit;
-}
-
-// 3) Login
-$msg = "";
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $user = $_POST["username"] ?? "";
-    $pass = $_POST["password"] ?? "";
-
-    $stmt = $mysqli->prepare("SELECT pk, username, senha FROM usuarios WHERE username=? AND senha=?");
-    $stmt->bind_param("ss", $user, $pass);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $dados = $result->fetch_assoc();
-    $stmt->close();
-
-    if ($dados) {
-        $_SESSION["user_pk"] = $dados["pk"];
-        $_SESSION["username"] = $dados["username"];
-        header("Location: index.php");
-        exit;
-    } else {
-        $msg = "Usuário ou senha incorretos!";
-    }
-}
-?>
-
-<!doctype html>
-<html lang="pt-br">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Login Simples</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title></title>
 </head>
 <body>
-<?php if (!empty($_SESSION["user_pk"])): ?>
-  <div class="card">
-    <h3>Bem-vindo, <?= $_SESSION["username"] ?>!</h3>
-    <p>Sessão ativa.</p>
-    <p><a href="?logout=1">Sair</a></p>
-  </div>
-
-<?php else: ?>
-  <div class="card">
-    <div class="login"><h3 class="login">Login</h3></div>
-    <?php if ($msg): ?><p class="msg"><?= $msg ?></p><?php endif; ?>
-    <form method="post">
-      <input type="text" name="username" placeholder="Usuário" required>
-      <input type="password" name="password" placeholder="Senha" required>
-      <button type="submit">Entrar</button>
-    </form>
-    <!-- <p><small>Dica: admin / 123456</small></p> -->
-  </div>
-<?php endif; ?>
-
+    <h2>O que você quer fazer?</h2>
+<form method="get">
+    <a href="create.php">Cadastrar novo Medicamento</a>
+    <br><br>
+    <a href="read.php">Ver Medicamentos</a>
+    <br><br>
+    <a href="login.php?logout=1">Sair</a>
+    <br><br>
+</form>
 </body>
 </html>

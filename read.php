@@ -1,49 +1,38 @@
 <?php
 include 'db.php';
 
-// Filtros
-$genero = $_GET['genero'] ?? '';
-$autor = $_GET['autor'] ?? '';
-$ano = $_GET['ano'] ?? '';
+$nome = $_GET['nome'] ?? '';
 
-$sql = "SELECT l.*, a.nome AS autor_nome FROM livros l JOIN autores a ON l.id_autor=a.id_autor WHERE 1=1";
-
-if ($genero) $sql .= " AND l.genero LIKE '%".$conn->real_escape_string($genero)."%'";
-if ($autor) $sql .= " AND a.nome LIKE '%".$conn->real_escape_string($autor)."%'";
-if ($ano) $sql .= " AND l.ano_publicacao=".intval($ano);
+$sql = "SELECT * FROM medicamentos WHERE 1=1";
+if ($nome) $sql .= " AND nome LIKE '%".$conn->real_escape_string($nome)."%'";
 
 $result = $conn->query($sql);
 ?>
 
-<h2>Lista de Livros</h2>
+<h2>Lista de Medicamentos</h2>
 <form method="get">
-    Filtro: Gênero <input type="text" name="genero" value="<?= $genero ?>">
-    Autor <input type="text" name="autor" value="<?= $autor ?>">
-    Ano <input type="number" name="ano" value="<?= $ano ?>">
+    Filtro: Nome <input type="text" name="nome" value="<?= $nome ?>">
     <button type="submit">Filtrar</button>
     <a href="read.php">Limpar</a>
 </form>
 
-<a href="create.php">Cadastrar novo livro</a>
+<a href="create.php">Cadastrar novo medicamento</a>
 <table border="1" cellpadding="5">
     <tr>
         <th>ID</th>
-        <th>Título</th>
-        <th>Gênero</th>
-        <th>Ano</th>
-        <th>Autor</th>
-        <th>Ações</th>
+        <th>Nome</th>
+        <th>Quantidade</th>
+        <th>Preço</th>
     </tr>
-    <?php while($l = $result->fetch_assoc()): ?>
+    <?php while($m = $result->fetch_assoc()): ?>
     <tr>
-        <td><?= $l['id_livro'] ?></td>
-        <td><?= $l['titulo'] ?></td>
-        <td><?= $l['genero'] ?></td>
-        <td><?= $l['ano_publicacao'] ?></td>
-        <td><?= $l['autor_nome'] ?></td>
+        <td><?= $m['id_medicamento'] ?></td>
+        <td><?= $m['nome'] ?></td>
+        <td><?= $m['quantidade'] ?></td>
+        <td><?= number_format($m['preco'], 2, ',', '.') ?></td>
         <td>
-            <a href="update.php?id=<?= $l['id_livro'] ?>">Editar</a> |
-            <a href="delete.php?id=<?= $l['id_livro'] ?>" onclick="return confirm('Deseja realmente excluir?')">Excluir</a>
+            <a href="update.php?id=<?= $m['id_medicamento'] ?>">Editar</a> |
+            <a href="delete.php?id=<?= $m['id_medicamento'] ?>" onclick="return confirm('Deseja realmente excluir?')">Excluir</a>
         </td>
     </tr>
     <?php endwhile; ?>

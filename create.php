@@ -1,22 +1,21 @@
 <?php
 include 'db.php';
 
-// Buscar autores para o select
-$autores = $conn->query("SELECT * FROM autores ORDER BY nome");
-
-// Criar livro
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titulo = $_POST['titulo'];
-    $genero = $_POST['genero'];
-    $ano = intval($_POST['ano_publicacao']);
-    $id_autor = intval($_POST['id_autor']);
-    $anoAtual = date("Y");
-
-    if ($ano < 1501 || $ano > $anoAtual) {
-        $erro = "Ano inválido!";
+    $nome = $_POST['nome'];
+    $quantidade = intval($_POST['quantidade']);
+    $preco = floatval($_POST['preco']);
+    $tipo = $_POST['tipo'] ?? '';
+    $erro = '';
+    if ($quantidade < 0) {
+        $erro = "Quantidade inválida!";
+    } else if ($preco < 0) {
+        $erro = "Preço inválido!";
+    } else if (empty($tipo)) {
+        $erro = "Tipo do medicamento é obrigatório!";
     } else {
-        $stmt = $conn->prepare("INSERT INTO livros (titulo, genero, ano_publicacao, id_autor) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssii", $titulo, $genero, $ano, $id_autor);
+        $stmt = $conn->prepare("INSERT INTO medicamentos (nome_medicamento, estoque_medicamento, preco_medicamento, tipo_medicamento) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("sids", $nome, $quantidade, $preco, $tipo);
         $stmt->execute();
         $stmt->close();
         header("Location: read.php");
@@ -25,18 +24,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<h2>Cadastrar Livro</h2>
+<h2>Cadastrar Medicamento</h2>
 <?php if (!empty($erro)) echo "<p style='color:red;'>$erro</p>"; ?>
 <form method="post">
-    Título: <input type="text" name="titulo" required><br>
-    Gênero: <input type="text" name="genero" required><br>
-    Ano de Publicação: <input type="number" name="ano_publicacao" required><br>
-    Autor:
-    <select name="id_autor" required>
-        <?php while($a = $autores->fetch_assoc()): ?>
-            <option value="<?= $a['id_autor'] ?>"><?= $a['nome'] ?></option>
-        <?php endwhile; ?>
-    </select><br>
+    Nome: <input type="text" name="nome" required><br>
+    Quantidade: <input type="number" name="quantidade" required><br>
+    Preço: <input type="number" step="0.01" name="preco" required><br>
+    Tipo: <input type="text" name="tipo" required><br>
+    
     <button type="submit">Cadastrar</button>
 </form>
-<a href="read.php">Voltar à lista</a>
+<a href="index.php">Voltar à lista</a>
