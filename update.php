@@ -2,41 +2,51 @@
 include 'db.php';
 
 $id = intval($_GET['id']);
-$livro = $conn->query("SELECT * FROM livros WHERE id_livro=$id")->fetch_assoc();
-$autores = $conn->query("SELECT * FROM autores ORDER BY nome");
+$medicamento = $conn->query("SELECT * FROM medicamentos WHERE id_medicamento = $id")->fetch_assoc();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titulo = $_POST['titulo'];
-    $genero = $_POST['genero'];
-    $ano = intval($_POST['ano_publicacao']);
-    $id_autor = intval($_POST['id_autor']);
-    $anoAtual = date("Y");
+    $nome = $_POST['nome'];
+    $quantidade = intval($_POST['quantidade']);
+    $preco = floatval($_POST['preco']);
+    $tipo = $_POST['tipo'] ?? '';
+    $erro = '';
 
-    if ($ano < 1501 || $ano > $anoAtual) {
-        $erro = "Ano inválido!";
+    if ($quantidade < 0) {
+        $erro = "Quantidade inválida!";
+    } else if ($preco < 0) {
+        $erro = "Preço inválido!";
+    } else if (empty($tipo)) {
+        $erro = "Tipo do medicamento é obrigatório!";
     } else {
-        $stmt = $conn->prepare("UPDATE livros SET titulo=?, genero=?, ano_publicacao=?, id_autor=? WHERE id_livro=?");
-        $stmt->bind_param("ssiii", $titulo, $genero, $ano, $id_autor, $id);
+        $stmt = $conn->prepare("UPDATE medicamentos SET nome_medicamento=?, estoque_medicamento=?, preço_medicamento=?, tipo_medicamento=? WHERE id_medicamento=?");
+        $stmt->bind_param("sidsi", $nome, $quantidade, $preco, $tipo, $id);
         $stmt->execute();
         $stmt->close();
+
         header("Location: read.php");
         exit;
     }
 }
 ?>
 
-<h2>Editar Livro</h2>
+<h2>Editar Medicamento</h2>
+
 <?php if (!empty($erro)) echo "<p style='color:red;'>$erro</p>"; ?>
+
 <form method="post">
-    Título: <input type="text" name="titulo" value="<?= $livro['titulo'] ?>" required><br>
-    Gênero: <input type="text" name="genero" value="<?= $livro['genero'] ?>" required><br>
-    Ano de Publicação: <input type="number" name="ano_publicacao" value="<?= $livro['ano_publicacao'] ?>" required><br>
-    Autor:
-    <select name="id_autor" required>
-        <?php while($a = $autores->fetch_assoc()): ?>
-            <option value="<?= $a['id_autor'] ?>" <?= $a['id_autor']==$livro['id_autor']?'selected':'' ?>><?= $a['nome'] ?></option>
-        <?php endwhile; ?>
-    </select><br>
+    Nome: <input type="text" name="nome" value="<?= htmlspecialchars($medicamento['nome_medicamento']) ?>" required><br>
+    Quantidade: <input type="number" name="quantidade" value="<?= htmlspecialchars($medicamento['estoque_medicamento']) ?>" required><br>
+    Preço: <input type="number" step="0.01" name="preco" value="<?= htmlspecialchars($medicamento['preço_medicamento']) ?>" required><br>
+    
+    Tipo:
+    <select name="tipo" required>
+        <option value="" disabled>Selecione o tipo</option>
+        <option value="A" <?= $medicamento['tipo_medicamento'] == 'A' ? 'selected' : '' ?>>Tipo A</option>
+        <option value="B" <?= $medicamento['tipo_medicamento'] == 'B' ? 'selected' : '' ?>>Tipo B</option>
+        <option value="C" <?= $medicamento['tipo_medicamento'] == 'C' ? 'selected' : '' ?>>Tipo C</option>
+    </select><br><br>
+
     <button type="submit">Atualizar</button>
 </form>
+
 <a href="read.php">Voltar à lista</a>
