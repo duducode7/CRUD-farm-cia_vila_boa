@@ -11,7 +11,7 @@ $result = $conn->query($sql);
 
 <h2>Lista de Medicamentos</h2>
 <form method="get">
-    Filtro: Nome <input type="text" name="nome" value="<?= $nome ?>">
+    Filtro: (Nome) <input type="text" name="nome" value="<?= $nome ?>">
     <button type="submit">Filtrar</button>
     <a href="read.php">Limpar</a>
 </form>
